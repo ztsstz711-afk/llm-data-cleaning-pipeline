@@ -1,0 +1,75 @@
+import json
+import tempfile
+import unittest
+from pathlib import Path
+
+from src.pipeline import run_pipeline
+
+
+TEST_CONFIG = {
+    "min_length": 20,
+    "max_length": 5000,
+    "quality_threshold": 0.0,
+    "max_url_count": 2,
+    "max_special_char_ratio": 0.3,
+    "max_repeated_char_ratio": 0.5,
+    "min_valid_char_ratio": 0.5,
+}
+
+
+class PipelineTests(unittest.TestCase):
+    def test_pipeline_creates_outputs_and_consistent_counts(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            input_path = temp_path / "sample.jsonl"
+            output_dir = temp_path / "output"
+            config_path = temp_path / "config.yaml"
+
+            records = [
+                {"text": "A useful document with enough text to pass filtering."},
+                {"text": "A useful document with enough text to pass filtering."},
+                {"text": "Short text."},
+            ]
+            input_path.write_text(
+                "\n".join(json.dumps(record) for record in records) + "\n",
+                encoding="utf-8",
+            )
+
+            report = run_pipeline(input_path, output_dir, config_path, TEST_CONFIG)
+
+            self.assertTrue((output_dir / "cleaned.jsonl").exists())
+            self.assertTrue((output_dir / "report.json").exists())
+            self.assertEqual(report["total_records"], 3)
+            self.assertEqual(report["kept_records"], 1)
+            self.assertEqual(report["removed_records"], 2)
+            self.assertEqual(
+                report["total_records"],
+                report["kept_records"] + report["removed_records"],
+            )
+
+    def test_pipeline_creates_markdown_summary(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            input_path = temp_path / "sample.jsonl"
+            output_dir = temp_path / "output"
+            config_path = temp_path / "config.yaml"
+            input_path.write_text(
+                json.dumps(
+                    {"text": "A useful document with enough text for the summary."}
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            run_pipeline(input_path, output_dir, config_path, TEST_CONFIG)
+
+            summary_path = output_dir / "summary.md"
+            self.assertTrue(summary_path.exists())
+            summary = summary_path.read_text(encoding="utf-8")
+            self.assertIn("# Data Cleaning Summary", summary)
+            self.assertIn("Total records", summary)
+            self.assertIn("Quality Score Summary", summary)
+
+
+if __name__ == "__main__":
+    unittest.main()

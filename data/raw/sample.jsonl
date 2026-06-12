@@ -1,0 +1,14 @@
+{"text": "  Large language models require clean and diverse training data.   This record contains extra spaces.  "}
+{"text": "Large language models require clean and diverse training data. This record contains extra spaces."}
+{"text": "Short text."}
+{"text": "   "}
+{"text": "Data cleaning removes noisy examples, normalizes formatting, and improves the overall quality of a training corpus."}
+{"text": "重复字符会降低文本质量评分，但这条中文文本仍然可以作为有效语料被清洗流程保留下来。"}
+{"text": "A practical pipeline should be understandable, reproducible, and easy to run on a local Windows computer."}
+not valid json
+{"content": "This object does not contain the required text field."}
+{"text": 12345}
+{"text": "Visit https://example.com/a and https://example.com/b and https://example.com/c for repeated promotional links."}
+{"text": "Useful words remain here @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ mixed with excessive symbols."}
+{"text": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa repeated characters dominate this record."}
+{"text": "Punctuation sample: ,.!?;:，。！？；：、,.!?;:，。！？；：、,.!?;:，。！？；：、,.!?;:，。！？；：、"}

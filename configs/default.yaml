@@ -1,0 +1,7 @@
+min_length: 20
+max_length: 5000
+quality_threshold: 0.0
+max_url_count: 2
+max_special_char_ratio: 0.3
+max_repeated_char_ratio: 0.5
+min_valid_char_ratio: 0.5

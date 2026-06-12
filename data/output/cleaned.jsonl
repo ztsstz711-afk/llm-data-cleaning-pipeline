@@ -1,0 +1,4 @@
+{"text": "Large language models require clean and diverse training data. This record contains extra spaces.", "quality_score": 0.7529, "quality_details": {"length_score": 0.485, "valid_character_ratio": 0.9762, "repeated_character_ratio": 0.131}}
+{"text": "Data cleaning removes noisy examples, normalizes formatting, and improves the overall quality of a training corpus.", "quality_score": 0.792, "quality_details": {"length_score": 0.575, "valid_character_ratio": 0.97, "repeated_character_ratio": 0.11}}
+{"text": "重复字符会降低文本质量评分，但这条中文文本仍然可以作为有效语料被清洗流程保留下来。", "quality_score": 0.6466, "quality_details": {"length_score": 0.205, "valid_character_ratio": 0.9512, "repeated_character_ratio": 0.0732}}
+{"text": "A practical pipeline should be understandable, reproducible, and easy to run on a local Windows computer.", "quality_score": 0.7733, "quality_details": {"length_score": 0.525, "valid_character_ratio": 0.9667, "repeated_character_ratio": 0.1}}

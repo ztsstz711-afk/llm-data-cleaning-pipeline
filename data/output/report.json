@@ -1,0 +1,43 @@
+{
+  "input_path": "E:\\Projects\\llm-data-cleaning-project\\data\\raw\\sample.jsonl",
+  "output_path": "E:\\Projects\\llm-data-cleaning-project\\data\\output\\cleaned.jsonl",
+  "config_path": "E:\\Projects\\llm-data-cleaning-project\\configs\\default.yaml",
+  "started_at_utc": "2026-06-12T15:06:22.041456+00:00",
+  "processing_time_seconds": 0.001,
+  "settings": {
+    "min_length": 20,
+    "max_length": 5000,
+    "quality_threshold": 0.0,
+    "max_url_count": 2,
+    "max_special_char_ratio": 0.3,
+    "max_repeated_char_ratio": 0.5,
+    "min_valid_char_ratio": 0.5,
+    "deduplication": "sha256_exact_match"
+  },
+  "total_records": 14,
+  "valid_records": 11,
+  "kept_records": 4,
+  "removed_records": 10,
+  "keep_ratio": 0.2857,
+  "remove_ratio": 0.7143,
+  "invalid_record_counts": {
+    "invalid_json": 1,
+    "missing_text": 1,
+    "invalid_text_type": 1
+  },
+  "filter_reason_counts": {
+    "empty_text": 1,
+    "high_repeated_char_ratio": 1,
+    "high_special_char_ratio": 1,
+    "low_valid_char_ratio": 1,
+    "too_many_urls": 1,
+    "too_short": 1
+  },
+  "duplicate_records": 1,
+  "quality_score_summary": {
+    "min": 0.6466,
+    "max": 0.792,
+    "mean": 0.7412,
+    "median": 0.7631
+  }
+}
