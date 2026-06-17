@@ -34,6 +34,7 @@ def write_summary(path: Path, report: dict[str, Any]) -> None:
         f"| Removed records | {report['removed_records']} |",
         f"| Keep ratio | {report['keep_ratio']:.4f} |",
         f"| Duplicate records | {report['duplicate_records']} |",
+        f"| Near duplicate records | {report.get('near_duplicate_records', 0)} |",
         "",
         "## Invalid Records",
         "",

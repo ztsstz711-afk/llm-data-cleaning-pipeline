@@ -1,0 +1,7 @@
+reason,count
+empty_text,1
+high_repeated_char_ratio,1
+high_special_char_ratio,1
+low_valid_char_ratio,1
+too_many_urls,1
+too_short,1

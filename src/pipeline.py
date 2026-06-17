@@ -13,6 +13,7 @@ from src.cleaning import (
 from src.data_mixer import sample_mixture
 from src.jsonl_io import read_jsonl, write_json, write_jsonl
 from src.llm_judge import LLMJudge
+from src.near_dedup import is_near_duplicate, simhash
 from src.quality_scorer import score_text
 from src.rag_chunker import build_chunks
 from src.summary import write_summary
@@ -44,6 +45,9 @@ MODULE_DEFAULTS: dict[str, int | float] = {
     "mixture_quality_high": 1.5,
     "mixture_quality_medium": 1.0,
     "mixture_quality_low": 0.5,
+    "near_dedup_enabled": False,
+    "simhash_threshold": 3,
+    "simhash_num_bits": 64,
 }
 
 JUDGE_DEFAULTS: dict[str, Any] = {
@@ -115,10 +119,12 @@ def run_pipeline(
         "invalid_text_type": 0,
     }
     seen_hashes: set[str] = set()
+    simhash_fingerprints: list[int] = []
     cleaned_records: list[dict] = []
     total_records = 0
     valid_records = 0
     duplicate_records = 0
+    near_duplicate_records = 0
 
     for _, record, validation_error in read_jsonl(input_path):
         total_records += 1
@@ -151,6 +157,20 @@ def run_pipeline(
             duplicate_records += 1
             continue
         seen_hashes.add(fingerprint)
+
+        if config["near_dedup_enabled"] and is_near_duplicate(
+            normalized_text,
+            simhash_fingerprints,
+            int(config["simhash_threshold"]),
+            int(config["simhash_num_bits"]),
+        ):
+            near_duplicate_records += 1
+            filter_reason_counts["near_duplicate"] += 1
+            continue
+        if config["near_dedup_enabled"]:
+            simhash_fingerprints.append(
+                simhash(normalized_text, int(config["simhash_num_bits"]))
+            )
 
         quality_details = score_text(normalized_text)
         quality_score = quality_details["final_quality_score"]
@@ -237,6 +257,9 @@ def run_pipeline(
             "rag_chunk_overlap": config["rag_chunk_overlap"],
             "rag_chunk_quality_threshold": config["rag_chunk_quality_threshold"],
             "synthetic_qa_min_quality": config["synthetic_qa_min_quality"],
+            "near_dedup_enabled": config["near_dedup_enabled"],
+            "simhash_threshold": config["simhash_threshold"],
+            "simhash_num_bits": config["simhash_num_bits"],
             "llm_judge": judge_config,
             "deduplication": "sha256_exact_match",
         },
@@ -249,6 +272,7 @@ def run_pipeline(
         "invalid_record_counts": invalid_record_counts,
         "filter_reason_counts": dict(sorted(filter_reason_counts.items())),
         "duplicate_records": duplicate_records,
+        "near_duplicate_records": near_duplicate_records,
         "quality_score_summary": _score_summary(scores),
         "quality_distributions": quality_distributions,
         "judge_mode": str(judge_config["mode"]) if judge else "disabled",

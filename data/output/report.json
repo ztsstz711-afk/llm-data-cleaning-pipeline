@@ -2,8 +2,8 @@
   "input_path": "E:\\Projects\\llm-data-cleaning-project\\data\\raw\\sample.jsonl",
   "output_path": "E:\\Projects\\llm-data-cleaning-project\\data\\output\\cleaned.jsonl",
   "config_path": "E:\\Projects\\llm-data-cleaning-project\\configs\\default.yaml",
-  "started_at_utc": "2026-06-16T18:09:27.337072+00:00",
-  "processing_time_seconds": 0.0054,
+  "started_at_utc": "2026-06-17T07:15:34.077551+00:00",
+  "processing_time_seconds": 0.0039,
   "settings": {
     "min_length": 20,
     "max_length": 5000,
@@ -16,6 +16,9 @@
     "rag_chunk_overlap": 50,
     "rag_chunk_quality_threshold": 0.0,
     "synthetic_qa_min_quality": 0.0,
+    "near_dedup_enabled": false,
+    "simhash_threshold": 3,
+    "simhash_num_bits": 64,
     "llm_judge": {
       "enabled": true,
       "mode": "heuristic",
@@ -44,6 +47,7 @@
     "too_short": 1
   },
   "duplicate_records": 1,
+  "near_duplicate_records": 0,
   "quality_score_summary": {
     "min": 0.712,
     "max": 0.8754,

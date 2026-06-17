@@ -80,6 +80,42 @@ class PipelineTests(unittest.TestCase):
             self.assertIn("Total records", summary)
             self.assertIn("Quality Score Summary", summary)
 
+    def test_pipeline_can_filter_near_duplicates_when_enabled(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            input_path = temp_path / "sample.jsonl"
+            output_dir = temp_path / "output"
+            config_path = temp_path / "config.yaml"
+            config = {
+                **TEST_CONFIG,
+                "near_dedup_enabled": True,
+                "simhash_threshold": 8,
+                "simhash_num_bits": 64,
+            }
+            records = [
+                {
+                    "text": (
+                        "Large language models require clean and diverse training data "
+                        "for reliable model behavior."
+                    )
+                },
+                {
+                    "text": (
+                        "Large language models require clean, diverse training data "
+                        "for reliable model behavior."
+                    )
+                },
+            ]
+            input_path.write_text(
+                "\n".join(json.dumps(record) for record in records) + "\n",
+                encoding="utf-8",
+            )
+
+            report = run_pipeline(input_path, output_dir, config_path, config)
+
+            self.assertEqual(report["near_duplicate_records"], 1)
+            self.assertEqual(report["filter_reason_counts"]["near_duplicate"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()

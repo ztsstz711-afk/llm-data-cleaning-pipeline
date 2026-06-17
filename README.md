@@ -22,9 +22,9 @@ raw JSONL
 -> reports
 ```
 
-当前 dedup 是 **SHA-256 exact dedup**，只能识别完全重复文本。
+当前默认 dedup 是 **SHA-256 exact dedup**，用于识别完全重复文本。
 
-当前不支持 near-duplicate detection，例如 SimHash、MinHash 或 LSH。
+项目也支持可选的 **SimHash near dedup**，但默认关闭。SimHash 用于识别高度相似文本；它不是 MinHash、LSH 或分布式去重。
 
 ## 核心功能
 
@@ -32,11 +32,14 @@ raw JSONL
 - 文本规范化
 - 规则过滤
 - SHA-256 exact dedup
+- optional SimHash near dedup（默认关闭）
 - 多维质量评分
 - LLM-as-a-Judge
 - RAG chunk 构建
 - template-based synthetic QA
 - data mixture sampling
+- report assets generation
+- GitHub Actions CI
 - `report.json` 和 `summary.md` 生成
 
 ## 快速运行
@@ -51,6 +54,12 @@ python scripts/run_demo.py
 
 ```powershell
 python -m unittest discover -s tests -v
+```
+
+生成静态报告图表：
+
+```powershell
+python scripts/generate_report_assets.py
 ```
 
 ## Demo 结果
@@ -81,6 +90,10 @@ Average judge score: 3.4545
 - `data/output/train_mix.jsonl`
 - `data/output/report.json`
 - `data/output/summary.md`
+- `data/output/report_assets/filter_reasons.csv`
+- `data/output/report_assets/quality_summary.csv`
+- `data/output/report_assets/record_overview.svg`
+- `data/output/report_assets/filter_reasons.svg`
 
 其中：
 
@@ -90,11 +103,13 @@ Average judge score: 3.4545
 - `train_mix.jsonl`：按 source/domain/language/quality_level 采样后的训练混合数据
 - `report.json`：机器可读的统计报告
 - `summary.md`：适合人工快速查看的 Markdown 报告
+- `report_assets/`：适合 GitHub 展示的静态 CSV / SVG 图表
 
 ## 主要模块
 
 - `src/pipeline.py`：串联完整数据治理流程
 - `src/cleaning.py`：文本规范化、规则过滤和 SHA-256 hash
+- `src/near_dedup.py`：可选 SimHash near-duplicate detection
 - `src/jsonl_io.py`：JSONL 读取、校验和写入
 - `src/quality_scorer.py`：多维启发式质量评分
 - `src/llm_judge.py`：LLM-as-a-Judge，支持 heuristic、mock 和 OpenAI-compatible API 模式
@@ -102,6 +117,7 @@ Average judge score: 3.4545
 - `src/synthetic_qa.py`：template-based synthetic QA 生成
 - `src/data_mixer.py`：按 source/domain/language/quality_level 做 data mixture sampling
 - `src/summary.py`：生成 Markdown summary 报告
+- `scripts/generate_report_assets.py`：从 `report.json` 生成静态 CSV / SVG 报告图表
 
 ## 测试
 
@@ -127,7 +143,11 @@ OK
 
 - 不是分布式数据处理系统
 - 没有 GPU 加速
-- 没有 MinHash / LSH / SimHash near dedup
+- SimHash near dedup 是可选功能，默认关闭
+- 没有 MinHash / LSH / 分布式 near dedup
+- SimHash 是轻量级近似去重，不是 MinHash / LSH / 分布式去重
+- report assets 是静态展示图表，不是可视化平台
+- CI 只做基础 demo 和 unit tests
 - LLM Judge 默认是 heuristic，本地可跑；也支持 mock 和 OpenAI-compatible API 模式
 - 当前使用小样例数据，主要用于展示 LLM 数据治理流程
 
@@ -136,10 +156,12 @@ OK
 这个项目适合围绕一条数据的生命周期来讲：
 
 - 为什么 LLM 训练和 RAG 前需要数据清洗：原始语料常见空文本、重复、噪声、广告链接和结构混乱等问题。
-- exact dedup 和 near dedup 的区别：当前项目只做 SHA-256 exact dedup，能去掉完全重复文本；近似重复需要 SimHash、MinHash 或 LSH 等额外策略。
+- exact dedup 和 near dedup 的区别：SHA-256 exact dedup 只能去掉完全重复文本；SimHash near dedup 可以在开启后识别高度相似文本，但当前不做 MinHash、LSH 或分布式去重。
 - 为什么要做多维质量评分：单一规则很难描述文本质量，长度、可读性、信息量、噪声和重复度需要分开看。
 - 为什么引入 LLM-as-a-Judge：底层质量分更偏工程指标，judge 层把这些信号转成“是否适合 pretraining / RAG / SFT”的业务判断。
 - RAG chunk 和 synthetic QA 如何服务后续数据准备：chunk 可直接进入检索语料，QA demo 展示了后续扩展到指令数据或评测数据的入口。
 - report 和 summary 如何帮助分析数据质量：`report.json` 适合程序读取，`summary.md` 适合人工快速浏览。
+- report assets 为什么有用：CSV 方便二次分析，SVG 能直接在 GitHub 打开，适合快速展示清洗前后的关键统计。
+- 为什么加 CI：每次 push 或 pull request 都跑 demo 和 unit tests，避免后续改动破坏主流程。
 
 整体上，这个项目不是为了堆复杂技术，而是展示一个 LLM 数据治理 Pipeline 应该如何拆模块、留统计、做验证，并保持本地可运行。

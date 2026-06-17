@@ -2,8 +2,8 @@
 
 ## Run Information
 
-- Run time (UTC): `2026-06-16T18:09:27.337072+00:00`
-- Processing time: `0.0054` seconds
+- Run time (UTC): `2026-06-17T07:15:34.077551+00:00`
+- Processing time: `0.0039` seconds
 - Input path: `E:\Projects\llm-data-cleaning-project\data\raw\sample.jsonl`
 - Output path: `E:\Projects\llm-data-cleaning-project\data\output\cleaned.jsonl`
 
@@ -16,6 +16,7 @@
 | Removed records | 10 |
 | Keep ratio | 0.5238 |
 | Duplicate records | 1 |
+| Near duplicate records | 0 |
 
 ## Invalid Records
 

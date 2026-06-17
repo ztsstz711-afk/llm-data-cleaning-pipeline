@@ -5,6 +5,9 @@ max_url_count: 2
 max_special_char_ratio: 0.3
 max_repeated_char_ratio: 0.5
 min_valid_char_ratio: 0.5
+near_dedup_enabled: false
+simhash_threshold: 3
+simhash_num_bits: 64
 rag_chunk_size: 300
 rag_chunk_overlap: 50
 rag_chunk_quality_threshold: 0.0

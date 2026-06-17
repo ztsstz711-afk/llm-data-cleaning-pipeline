@@ -27,6 +27,12 @@ REQUIRED_SETTINGS = {
     "mixture_quality_low",
 }
 
+OPTIONAL_SETTINGS = {
+    "near_dedup_enabled": False,
+    "simhash_threshold": 3,
+    "simhash_num_bits": 64,
+}
+
 LLM_JUDGE_SETTINGS = {
     "enabled",
     "mode",
@@ -79,10 +85,13 @@ def load_config(path: Path) -> dict[str, Any]:
                 continue
 
             current_section = None
-            if key not in REQUIRED_SETTINGS:
+            allowed_settings = REQUIRED_SETTINGS | OPTIONAL_SETTINGS.keys()
+            if key not in allowed_settings:
                 raise ValueError(f"Unknown config setting: {key}")
             value = _parse_scalar(raw_value)
-            if not isinstance(value, (int, float)) or isinstance(value, bool):
+            if key in REQUIRED_SETTINGS and (
+                not isinstance(value, (int, float)) or isinstance(value, bool)
+            ):
                 raise ValueError(f"Config value for {key} must be a number")
             config[key] = value
 
@@ -90,6 +99,9 @@ def load_config(path: Path) -> dict[str, Any]:
     if missing_settings:
         missing = ", ".join(sorted(missing_settings))
         raise ValueError(f"Missing config settings: {missing}")
+
+    for key, value in OPTIONAL_SETTINGS.items():
+        config.setdefault(key, value)
 
     judge_config = config.get("llm_judge")
     if not isinstance(judge_config, dict):
@@ -115,6 +127,12 @@ def load_config(path: Path) -> dict[str, Any]:
         raise ValueError("quality_threshold must be between 0 and 1")
     if config["max_url_count"] < 0:
         raise ValueError("max_url_count must be at least 0")
+    if not isinstance(config["near_dedup_enabled"], bool):
+        raise ValueError("near_dedup_enabled must be true or false")
+    if config["simhash_threshold"] < 0:
+        raise ValueError("simhash_threshold must be at least 0")
+    if config["simhash_num_bits"] <= 0:
+        raise ValueError("simhash_num_bits must be greater than 0")
 
     ratio_settings = {
         "max_special_char_ratio",
