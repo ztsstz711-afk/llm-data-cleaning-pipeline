@@ -3,7 +3,7 @@
 {"text": "Short text."}
 {"text": "   "}
 {"text": "Data cleaning removes noisy examples, normalizes formatting, and improves the overall quality of a training corpus."}
-{"text": "重复字符会降低文本质量评分，但这条中文文本仍然可以作为有效语料被清洗流程保留下来。"}
+{"text": "Decoded payload contains invalid byte sequences ���������� and broken fragments, so the original document cannot be trusted as readable training data."}
 {"text": "A practical pipeline should be understandable, reproducible, and easy to run on a local Windows computer."}
 not valid json
 {"content": "This object does not contain the required text field."}
@@ -12,3 +12,10 @@ not valid json
 {"text": "Useful words remain here @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ mixed with excessive symbols."}
 {"text": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa repeated characters dominate this record."}
 {"text": "Punctuation sample: ,.!?;:，。！？；：、,.!?;:，。！？；：、,.!?;:，。！？；：、,.!?;:，。！？；：、"}
+{"text": "Python reference counting releases most objects when their reference count reaches zero. A cyclic garbage collector separately detects unreachable object cycles, which is important for reliable long-running data pipelines."}
+{"text": "LIMITED OFFER: buy now and receive a huge discount. Click here for a free trial and subscribe today at https://promo.example/deal before the sale ends."}
+{"text": "Mirror pages https://noise.example/a and https://noise.example/b repeat navigation labels, cookie notices, login prompts, and unrelated footer text without adding useful knowledge."}
+{"text": "Large language models require clean and diverse training data; this near-duplicate record uses different punctuation and one extra phrase."}
+{"text": "Customer support case: fictional user alice.demo@example.com reported a login issue and provided the test phone number +1 202-555-0147 for callback verification."}
+{"text": "Retrieval-augmented generation combines a retriever with a language model. The retriever selects relevant passages from a knowledge base, and the model uses those passages as context when producing an answer."}
+{"text": "Question: Why is a validation set kept separate from training data? Answer: It estimates how well a model generalizes to unseen examples and helps compare model settings without fitting directly to the test set."}

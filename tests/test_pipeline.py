@@ -39,9 +39,19 @@ class PipelineTests(unittest.TestCase):
 
             self.assertTrue((output_dir / "cleaned.jsonl").exists())
             self.assertTrue((output_dir / "report.json").exists())
+            self.assertTrue((output_dir / "rag_chunks.jsonl").exists())
+            self.assertTrue((output_dir / "synthetic_qa.jsonl").exists())
+            self.assertTrue((output_dir / "train_mix.jsonl").exists())
             self.assertEqual(report["total_records"], 3)
             self.assertEqual(report["kept_records"], 1)
             self.assertEqual(report["removed_records"], 2)
+            self.assertEqual(report["judge_mode"], "heuristic")
+            cleaned_record = json.loads(
+                (output_dir / "cleaned.jsonl")
+                .read_text(encoding="utf-8")
+                .splitlines()[0]
+            )
+            self.assertIn("judge_result", cleaned_record)
             self.assertEqual(
                 report["total_records"],
                 report["kept_records"] + report["removed_records"],

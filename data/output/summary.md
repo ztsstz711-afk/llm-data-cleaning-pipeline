@@ -2,8 +2,8 @@
 
 ## Run Information
 
-- Run time (UTC): `2026-06-12T15:06:22.041456+00:00`
-- Processing time: `0.001` seconds
+- Run time (UTC): `2026-06-16T18:09:27.337072+00:00`
+- Processing time: `0.0054` seconds
 - Input path: `E:\Projects\llm-data-cleaning-project\data\raw\sample.jsonl`
 - Output path: `E:\Projects\llm-data-cleaning-project\data\output\cleaned.jsonl`
 
@@ -11,10 +11,10 @@
 
 | Metric | Value |
 | --- | ---: |
-| Total records | 14 |
-| Kept records | 4 |
+| Total records | 21 |
+| Kept records | 11 |
 | Removed records | 10 |
-| Keep ratio | 0.2857 |
+| Keep ratio | 0.5238 |
 | Duplicate records | 1 |
 
 ## Invalid Records
@@ -40,7 +40,18 @@
 
 | Statistic | Value |
 | --- | ---: |
-| Minimum | 0.6466 |
-| Maximum | 0.792 |
-| Mean | 0.7412 |
-| Median | 0.7631 |
+| Minimum | 0.712 |
+| Maximum | 0.8754 |
+| Mean | 0.7836 |
+| Median | 0.7625 |
+
+## LLM-as-a-Judge Summary
+
+| Metric | Value |
+| --- | ---: |
+| Judge mode | heuristic |
+| Average judge quality | 3.4545 |
+| High-quality records | 8 |
+| Low-quality records | 3 |
+| Useful for RAG | 8 |
+| Useful for SFT | 8 |

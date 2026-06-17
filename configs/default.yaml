@@ -5,3 +5,23 @@ max_url_count: 2
 max_special_char_ratio: 0.3
 max_repeated_char_ratio: 0.5
 min_valid_char_ratio: 0.5
+rag_chunk_size: 300
+rag_chunk_overlap: 50
+rag_chunk_quality_threshold: 0.0
+synthetic_qa_min_quality: 0.0
+synthetic_qa_max_pairs_per_chunk: 1
+mixture_sample_size: 100
+mixture_seed: 42
+mixture_source_default: 1.0
+mixture_domain_general: 1.0
+mixture_language_en: 1.0
+mixture_language_zh: 1.0
+mixture_language_unknown: 1.0
+mixture_quality_high: 1.5
+mixture_quality_medium: 1.0
+mixture_quality_low: 0.5
+llm_judge:
+  enabled: true
+  mode: heuristic
+  quality_threshold: 3
+  api_key_env: OPENAI_API_KEY

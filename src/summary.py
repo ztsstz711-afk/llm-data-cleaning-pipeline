@@ -73,6 +73,22 @@ def write_summary(path: Path, report: dict[str, Any]) -> None:
         ]
     )
 
+    if "judge_mode" in report:
+        lines.extend(
+            [
+                "## LLM-as-a-Judge Summary",
+                "",
+                "| Metric | Value |",
+                "| --- | ---: |",
+                f"| Judge mode | {report['judge_mode']} |",
+                f"| Average judge quality | {_format_value(report['avg_judge_quality_score'])} |",
+                f"| High-quality records | {report['high_quality_by_judge_count']} |",
+                f"| Low-quality records | {report['low_quality_by_judge_count']} |",
+                f"| Useful for RAG | {report['useful_for_rag_count']} |",
+                f"| Useful for SFT | {report['useful_for_sft_count']} |",
+                "",
+            ]
+        )
+
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines), encoding="utf-8")
-

@@ -52,6 +52,9 @@ def main() -> None:
     print(f"Kept records: {report['kept_records']}")
     print(f"Cleaned data: {output_dir / 'cleaned.jsonl'}")
     print(f"Report: {output_dir / 'report.json'}")
+    print(f"RAG chunks: {output_dir / 'rag_chunks.jsonl'}")
+    print(f"Synthetic QA: {output_dir / 'synthetic_qa.jsonl'}")
+    print(f"Training mix: {output_dir / 'train_mix.jsonl'}")
 
 
 if __name__ == "__main__":
