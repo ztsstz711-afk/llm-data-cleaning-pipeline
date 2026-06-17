@@ -1,60 +1,61 @@
-# LLM & RAG Data Quality Governance Pipeline
+# LLM & RAG 数据质量治理 Pipeline
 
-## Quick Overview
+## 项目简介
 
-This project is a lightweight local pipeline for **LLM training corpus cleaning** and **RAG data governance**.
+这是一个面向 **LLM 训练语料** 与 **RAG 数据治理** 的轻量级本地 Pipeline。
 
-It reads raw JSONL documents, validates and cleans text, removes exact duplicates, assigns explainable quality scores, runs an optional LLM-as-a-Judge layer, builds RAG chunks, creates template-based synthetic QA examples, samples a training mixture, and writes both machine-readable and human-readable reports.
+它不是分布式生产系统，也不追求大规模吞吐；它更适合作为实习、求职和面试展示用的 mini pipeline。项目覆盖了从原始 JSONL 文本到清洗、去重、质量评分、LLM Judge、RAG chunk、template QA、train mix 和报告生成的完整流程。
 
-This is a small, interview-friendly project. It is not a production or distributed data processing system.
+项目重点是：流程完整、模块清晰、结果可解释、能在本地一键跑通。
 
-## Pipeline Flow
+## Pipeline 流程
 
 ```text
 raw JSONL
-  -> cleaning/filtering
-  -> exact dedup
-  -> quality scoring
-  -> LLM-as-a-Judge
-  -> RAG chunks
-  -> synthetic QA
-  -> train mix
-  -> reports
+-> cleaning / filtering
+-> exact dedup
+-> quality scoring
+-> LLM-as-a-Judge
+-> RAG chunks
+-> synthetic QA
+-> train mix
+-> reports
 ```
 
-Current deduplication is **SHA-256 exact dedup only**. Near-duplicate detection, MinHash, SimHash, and distributed dedup are not implemented.
+当前 dedup 是 **SHA-256 exact dedup**，只能识别完全重复文本。
 
-## Quick Start
+当前不支持 near-duplicate detection，例如 SimHash、MinHash 或 LSH。
 
-Run the default local demo:
+## 核心功能
+
+- JSONL 读取与校验
+- 文本规范化
+- 规则过滤
+- SHA-256 exact dedup
+- 多维质量评分
+- LLM-as-a-Judge
+- RAG chunk 构建
+- template-based synthetic QA
+- data mixture sampling
+- `report.json` 和 `summary.md` 生成
+
+## 快速运行
+
+运行完整 demo：
 
 ```powershell
 python scripts/run_demo.py
 ```
 
-Run the pipeline directly:
-
-```powershell
-python -m src.main
-```
-
-Run with explicit paths:
-
-```powershell
-python -m src.main --input data/raw/sample.jsonl --output-dir data/output --config configs/default.yaml
-```
-
-Run tests:
+运行测试：
 
 ```powershell
 python -m unittest discover -s tests -v
 ```
 
-The default demo uses heuristic LLM-as-a-Judge mode and does not call any external API.
+## Demo 结果
 
-## Demo Results
-
-Current demo metrics from `python scripts/run_demo.py`:
+当前样例数据的真实运行结果：
 
 ```text
 Cleaned records: 11
@@ -66,169 +67,79 @@ Low quality by judge: 3
 Useful for RAG: 8
 Useful for SFT: 8
 Average judge score: 3.4545
-Tests: 34 OK
 ```
 
-These numbers are based on the small sample dataset in `data/raw/sample.jsonl`.
+这些数字来自仓库内置的小样例数据，用于展示流程，不代表大规模生产处理能力。
 
-## Input Format
+## 输出文件
 
-Input data is JSONL. Each line should be a JSON object with a string `text` field:
+运行 demo 后会在 `data/output/` 下生成：
 
-```json
-{"text": "Large language models require clean and diverse training data."}
-```
+- `data/output/cleaned.jsonl`
+- `data/output/rag_chunks.jsonl`
+- `data/output/synthetic_qa.jsonl`
+- `data/output/train_mix.jsonl`
+- `data/output/report.json`
+- `data/output/summary.md`
 
-The sample dataset includes high-quality technical text, low-quality noisy text, marketing text, URL boilerplate, exact duplicates, near-duplicate examples, fictional PII-like text, RAG-style knowledge text, and educational QA-style text.
+其中：
 
-## Outputs
+- `cleaned.jsonl`：清洗后的文本、质量分和 judge 结果
+- `rag_chunks.jsonl`：带 source metadata 的 RAG chunks
+- `synthetic_qa.jsonl`：基于模板生成的 QA 样本
+- `train_mix.jsonl`：按 source/domain/language/quality_level 采样后的训练混合数据
+- `report.json`：机器可读的统计报告
+- `summary.md`：适合人工快速查看的 Markdown 报告
 
-The demo writes outputs to `data/output/`:
+## 主要模块
 
-| File | Purpose |
-| --- | --- |
-| `cleaned.jsonl` | Cleaned documents with quality scores and judge results |
-| `rag_chunks.jsonl` | Fixed-length RAG chunks with source metadata |
-| `synthetic_qa.jsonl` | Template-based QA examples generated from chunks |
-| `train_mix.jsonl` | Sampled training mixture records |
-| `report.json` | Machine-readable metrics and quality distributions |
-| `summary.md` | Human-readable Markdown summary |
+- `src/pipeline.py`：串联完整数据治理流程
+- `src/cleaning.py`：文本规范化、规则过滤和 SHA-256 hash
+- `src/jsonl_io.py`：JSONL 读取、校验和写入
+- `src/quality_scorer.py`：多维启发式质量评分
+- `src/llm_judge.py`：LLM-as-a-Judge，支持 heuristic、mock 和 OpenAI-compatible API 模式
+- `src/rag_chunker.py`：固定长度与 overlap 的 RAG chunk 构建
+- `src/synthetic_qa.py`：template-based synthetic QA 生成
+- `src/data_mixer.py`：按 source/domain/language/quality_level 做 data mixture sampling
+- `src/summary.py`：生成 Markdown summary 报告
 
-Example cleaned record:
+## 测试
 
-```json
-{
-  "text": "Large language models require clean and diverse training data.",
-  "quality_score": 0.712,
-  "quality_details": {
-    "length_score": 0.3233,
-    "readability_score": 0.7371,
-    "informativeness_score": 0.5133,
-    "noise_score": 1.0,
-    "repetition_score": 0.9607,
-    "final_quality_score": 0.712
-  },
-  "judge_result": {
-    "quality_score": 4,
-    "educational_value": 4,
-    "informativeness": 3,
-    "noise_level": 1,
-    "is_spam": false,
-    "is_useful_for_pretraining": true,
-    "is_useful_for_rag": true,
-    "is_useful_for_sft": true,
-    "reason": "Heuristic score 4/5..."
-  }
-}
-```
+当前测试覆盖：
 
-## Key Modules
+- cleaning
+- jsonl io
+- pipeline
+- quality scorer
+- llm judge
+- rag chunker
+- synthetic QA
+- data mixer
 
-| Module | Role |
-| --- | --- |
-| `src/main.py` | CLI entry point |
-| `src/pipeline.py` | End-to-end orchestration |
-| `src/jsonl_io.py` | JSONL reading, validation, and writing |
-| `src/cleaning.py` | Normalization, rule filtering, and SHA-256 hashing |
-| `src/quality_scorer.py` | Multi-dimensional heuristic quality scoring |
-| `src/llm_judge.py` | LLM-as-a-Judge interface with heuristic, mock, and openai modes |
-| `src/prompt_templates.py` | Prompt and JSON schema for judge mode |
-| `src/rag_chunker.py` | Fixed-length RAG chunk builder with overlap |
-| `src/synthetic_qa.py` | Template-based QA generation demo |
-| `src/data_mixer.py` | Source/domain/language/quality-level mixture sampler |
-| `src/summary.py` | Markdown summary writer |
-| `src/config.py` | Minimal YAML-like config loader |
-
-## LLM-as-a-Judge Modes
-
-The project supports three judge modes:
-
-- `heuristic`: default local mode; no API call, deterministic behavior.
-- `mock`: fixed structured result for tests.
-- `openai`: optional OpenAI-compatible Chat Completions API mode.
-
-The default config keeps:
-
-```yaml
-llm_judge:
-  enabled: true
-  mode: heuristic
-  quality_threshold: 3
-  api_key_env: OPENAI_API_KEY
-```
-
-To try the real API demo, install the optional dependency and set environment variables:
-
-```powershell
-python -m pip install -r requirements.txt
-$env:OPENAI_API_KEY="your-api-key"
-$env:OPENAI_BASE_URL="https://api.openai.com/v1"
-$env:OPENAI_MODEL="your-chat-completions-model"
-python scripts/run_llm_judge_api_demo.py
-```
-
-The main demo does not depend on API keys.
-
-## Configuration
-
-Main config file:
-
-```text
-configs/default.yaml
-```
-
-It controls:
-
-- text length thresholds
-- URL and special-character filters
-- quality threshold
-- RAG chunk size and overlap
-- synthetic QA quality threshold
-- mixture sampling ratios
-- LLM judge mode
-
-The config loader intentionally supports only the small YAML subset used by this project.
-
-## Tests
-
-The project uses Python standard-library `unittest`.
-
-Current coverage includes:
-
-- text normalization and filtering
-- JSONL validation
-- exact hash behavior
-- quality scoring
-- LLM-as-a-Judge heuristic/mock/openai contract behavior
-- RAG chunking
-- synthetic QA generation
-- data mixture sampling
-- end-to-end pipeline outputs
-
-Run:
-
-```powershell
-python -m unittest discover -s tests -v
-```
-
-Current expected result:
+当前测试结果：
 
 ```text
 Ran 34 tests
 OK
 ```
 
-## Limitations
+## 项目边界
 
-- No near-duplicate detection yet.
-- No MinHash, SimHash, or LSH.
-- No distributed processing.
-- No GPU acceleration.
-- No vector database integration.
-- No model perplexity scoring.
-- Real LLM judging is optional and not used by the default demo.
-- The sample dataset is intentionally small and designed for demonstration.
+- 不是分布式数据处理系统
+- 没有 GPU 加速
+- 没有 MinHash / LSH / SimHash near dedup
+- LLM Judge 默认是 heuristic，本地可跑；也支持 mock 和 OpenAI-compatible API 模式
+- 当前使用小样例数据，主要用于展示 LLM 数据治理流程
 
-## Resume-Friendly Summary
+## 面试可讲点
 
-Built a lightweight Python data quality governance pipeline for LLM training corpus and RAG data preparation, including JSONL validation, rule-based filtering, SHA-256 exact deduplication, multi-dimensional heuristic quality scoring, LLM-as-a-Judge compatible evaluation, RAG chunking, template-based synthetic QA generation, data mixture sampling, and JSON/Markdown reporting with unittest coverage.
+这个项目适合围绕一条数据的生命周期来讲：
+
+- 为什么 LLM 训练和 RAG 前需要数据清洗：原始语料常见空文本、重复、噪声、广告链接和结构混乱等问题。
+- exact dedup 和 near dedup 的区别：当前项目只做 SHA-256 exact dedup，能去掉完全重复文本；近似重复需要 SimHash、MinHash 或 LSH 等额外策略。
+- 为什么要做多维质量评分：单一规则很难描述文本质量，长度、可读性、信息量、噪声和重复度需要分开看。
+- 为什么引入 LLM-as-a-Judge：底层质量分更偏工程指标，judge 层把这些信号转成“是否适合 pretraining / RAG / SFT”的业务判断。
+- RAG chunk 和 synthetic QA 如何服务后续数据准备：chunk 可直接进入检索语料，QA demo 展示了后续扩展到指令数据或评测数据的入口。
+- report 和 summary 如何帮助分析数据质量：`report.json` 适合程序读取，`summary.md` 适合人工快速浏览。
+
+整体上，这个项目不是为了堆复杂技术，而是展示一个 LLM 数据治理 Pipeline 应该如何拆模块、留统计、做验证，并保持本地可运行。
