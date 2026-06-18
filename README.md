@@ -4,7 +4,7 @@
 
 这是一个面向 **LLM 训练语料** 与 **RAG 数据治理** 的轻量级本地 Pipeline。
 
-它不是分布式生产系统，也不追求大规模吞吐；它更适合作为实习、求职和面试展示用的 mini pipeline。项目覆盖了从原始 JSONL 文本到清洗、去重、质量评分、LLM Judge、RAG chunk、template QA、train mix 和报告生成的完整流程。
+它不是分布式生产系统，也不追求大规模吞吐；它适合作为本地 LLM 数据质量治理流程的最小可复现实验。项目用于在小样例数据上验证文本清洗、去重、质量评分、LLM Judge、RAG/SFT 数据构造和报告生成流程。
 
 项目重点是：流程完整、模块清晰、结果可解释、能在本地一键跑通。
 
@@ -78,7 +78,7 @@ Useful for SFT: 8
 Average judge score: 3.4545
 ```
 
-这些数字来自仓库内置的小样例数据，用于展示流程，不代表大规模生产处理能力。
+这些数字来自仓库内置的小样例数据，用于验证流程，不代表大规模生产处理能力。
 
 ## 输出文件
 
@@ -102,8 +102,8 @@ Average judge score: 3.4545
 - `synthetic_qa.jsonl`：基于模板生成的 QA 样本
 - `train_mix.jsonl`：按 source/domain/language/quality_level 采样后的训练混合数据
 - `report.json`：机器可读的统计报告
-- `summary.md`：适合人工快速查看的 Markdown 报告
-- `report_assets/`：适合 GitHub 展示的静态 CSV / SVG 图表
+- `summary.md`：人工可读的 Markdown 摘要报告
+- `report_assets/`：静态 CSV / SVG 报告图表，便于在 GitHub 上直接查看
 
 ## 主要模块
 
@@ -131,11 +131,13 @@ Average judge score: 3.4545
 - rag chunker
 - synthetic QA
 - data mixer
+- near dedup
+- report assets
 
 当前测试结果：
 
 ```text
-Ran 34 tests
+Ran 42 tests
 OK
 ```
 
@@ -146,22 +148,21 @@ OK
 - SimHash near dedup 是可选功能，默认关闭
 - 没有 MinHash / LSH / 分布式 near dedup
 - SimHash 是轻量级近似去重，不是 MinHash / LSH / 分布式去重
-- report assets 是静态展示图表，不是可视化平台
+- report assets 是静态图表，不是可视化平台
 - CI 只做基础 demo 和 unit tests
 - LLM Judge 默认是 heuristic，本地可跑；也支持 mock 和 OpenAI-compatible API 模式
-- 当前使用小样例数据，主要用于展示 LLM 数据治理流程
+- 当前使用小样例数据，主要用于验证 LLM 数据治理流程
 
-## 面试可讲点
+## 设计取舍
 
-这个项目适合围绕一条数据的生命周期来讲：
+该 pipeline 按数据生命周期拆分为校验、过滤、去重、评分、构造和报告几个阶段：
 
-- 为什么 LLM 训练和 RAG 前需要数据清洗：原始语料常见空文本、重复、噪声、广告链接和结构混乱等问题。
-- exact dedup 和 near dedup 的区别：SHA-256 exact dedup 只能去掉完全重复文本；SimHash near dedup 可以在开启后识别高度相似文本，但当前不做 MinHash、LSH 或分布式去重。
-- 为什么要做多维质量评分：单一规则很难描述文本质量，长度、可读性、信息量、噪声和重复度需要分开看。
-- 为什么引入 LLM-as-a-Judge：底层质量分更偏工程指标，judge 层把这些信号转成“是否适合 pretraining / RAG / SFT”的业务判断。
-- RAG chunk 和 synthetic QA 如何服务后续数据准备：chunk 可直接进入检索语料，QA demo 展示了后续扩展到指令数据或评测数据的入口。
-- report 和 summary 如何帮助分析数据质量：`report.json` 适合程序读取，`summary.md` 适合人工快速浏览。
-- report assets 为什么有用：CSV 方便二次分析，SVG 能直接在 GitHub 打开，适合快速展示清洗前后的关键统计。
-- 为什么加 CI：每次 push 或 pull request 都跑 demo 和 unit tests，避免后续改动破坏主流程。
+- 数据进入 LLM/RAG 流程前需要基础质量治理：原始语料常见空文本、重复、噪声、广告链接和结构混乱等问题。
+- exact dedup 和 near dedup 负责解决不同层次的重复问题：SHA-256 exact dedup 只能去掉完全重复文本；SimHash near dedup 可以在开启后识别高度相似文本，但当前不做 MinHash、LSH 或分布式去重。
+- 多维质量评分比单一规则更容易定位问题：长度、可读性、信息量、噪声和重复度可以分别观察。
+- LLM-as-a-Judge 层把底层质量信号转换成更接近任务目标的判断，例如是否适合 pretraining、RAG 或 SFT。
+- RAG chunk 和 synthetic QA 为后续数据构造提供入口：chunk 可进入检索语料，QA demo 可以扩展为指令数据或评测数据准备流程。
+- `report.json`、`summary.md` 和 report assets 分别服务于程序读取、人工浏览和静态图表查看。
+- CI 在每次 push 或 pull request 时运行 demo 和 unit tests，用来检查主流程是否仍然稳定。
 
-整体上，这个项目不是为了堆复杂技术，而是展示一个 LLM 数据治理 Pipeline 应该如何拆模块、留统计、做验证，并保持本地可运行。
+整体上，这个项目不追求堆叠复杂技术，而是把 LLM 数据治理 Pipeline 拆成可运行、可测试、可解释的本地模块。
